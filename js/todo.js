@@ -3,6 +3,7 @@ const toDoInput = document.querySelector("#todo-form input");
 const toDoList = document.getElementById("todo-list");
 
 const TODOS_KEY = "todos";
+const LINE = "line";
 
 let toDos = [];
 
@@ -16,20 +17,53 @@ function deleteToDo(event) {
   toDos = toDos.filter((todo)=>todo.id !== parseInt(li.id));
   saveToDos();
 }
+function checkToDo(event){
+  const li = event.target.parentElement;
+  const span = li.querySelector("span");
+  const check = li.querySelector("#check");
+  span.classList.toggle(LINE); 
 
+  if(span.classList.contains(LINE)){
+    span.classList.add(LINE);
+    check.innerText = "✓";
+  }else{
+    span.classList.remove(LINE);
+    check.innerText = "";
+  }
+
+  for(let i=0; i < toDos.length; i++){
+    if (toDos[i].id == li.id){
+      toDos[i].checked = span.classList.contains(LINE);
+    }
+  }
+  
+  saveToDos();
+}
 function paintToDo(toDoObj) {
   const li = document.createElement("li");
+  const check = document.createElement("button");
   const span = document.createElement("span");
   const button = document.createElement("button");
 
   li.id = toDoObj.id;
+  check.id = "check"; 
   span.innerText = toDoObj.text;
-  button.innerText = "X";
+  button.innerText = "✗";
 
-  li.appendChild(button);
+  li.appendChild(check);
   li.appendChild(span);
+  li.appendChild(button);
   toDoList.appendChild(li);
 
+  if(toDoObj.checked){
+    span.classList.add(LINE);
+    check.innerText = "✓";
+  }else{
+    span.classList.remove(LINE);
+    check.innerText = "";
+  }
+
+  check.addEventListener("click", checkToDo);
   button.addEventListener("click", deleteToDo);
 }
 
@@ -38,7 +72,8 @@ function handleToDoSubmit(event) {
 
   const newToDoObj = {
     id: Date.now(),
-    text: toDoInput.value
+    text: toDoInput.value,
+    checked: false
   };
   toDos.push(newToDoObj);
   paintToDo(newToDoObj);
@@ -53,5 +88,5 @@ const savedToDos = JSON.parse(localStorage.getItem(TODOS_KEY));
 
 if (savedToDos) {
   toDos = savedToDos;
-  toDos.forEach( paintToDo);
+  toDos.forEach(paintToDo);
 }
